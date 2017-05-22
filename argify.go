@@ -24,10 +24,13 @@ func NewArgify() *Argify {
 }
 
 func (b *Argify) extractSharedParts(
-	commandName string,
+	prefix, commandName string,
 	k1 string,
 	v1 inflectlab.Field) (name, usage, envVar string, hidden bool) {
 	name = strings.ToLower(k1)
+	if prefix != "" {
+		name = strings.ToLower(prefix) + "-" + name
+	}
 	if v, ok := v1.Tags["name"]; ok {
 		name = v
 	}
@@ -82,7 +85,7 @@ func (b *Argify) setSharedParts(f cli.Flag, name, usage, envVar string, hidden b
 }
 
 func (b *Argify) process(
-	commandName string,
+	prefix, commandName string,
 	fields map[string]inflectlab.Field,
 	commands *[]cli.Command,
 	flags *[]cli.Flag) {
@@ -102,7 +105,7 @@ NEXT_FIELD:
 				if cmdFlags == nil {
 					cmdFlags = []cli.Flag{}
 				}
-				b.process((*commands)[kcmd].Name, v1.Children, &subCommands, &cmdFlags)
+				b.process("", (*commands)[kcmd].Name, v1.Children, &subCommands, &cmdFlags)
 				(*commands)[kcmd].Subcommands = subCommands
 				(*commands)[kcmd].Flags = cmdFlags
 
@@ -177,6 +180,13 @@ NEXT_FIELD:
 				}
 			}
 		default:
+			var cmdFlags = *flags
+			if cmdFlags == nil {
+				cmdFlags = []cli.Flag{}
+			}
+			var subCommands []cli.Command
+			b.process(k1, "", v1.Children, &subCommands, &cmdFlags)
+			*flags = cmdFlags
 			continue
 		}
 
@@ -194,7 +204,7 @@ NEXT_FIELD:
 			}
 		}
 
-		name, usage, envVar, hidden := b.extractSharedParts(commandName, k1, v1)
+		name, usage, envVar, hidden := b.extractSharedParts(prefix, commandName, k1, v1)
 		b.setSharedParts(f, name, usage, envVar, hidden)
 		if err := inflect.Set(f, "Destination", v1.Ptr.Addr().Interface()); err != nil {
 			// TODO:
@@ -212,7 +222,7 @@ func (b *Argify) Build(app *cli.App, confPtr interface{}) error {
 	}
 
 	b.appName = app.Name
-	b.process("", fields, &app.Commands, &app.Flags)
+	b.process("", "", fields, &app.Commands, &app.Flags)
 
 	return nil
 }
