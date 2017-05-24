@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/dc0d/tune"
-
 	"github.com/comail/colog"
 	"github.com/dc0d/argify"
 	"github.com/hashicorp/hcl"
@@ -93,6 +91,9 @@ type ConfPile struct {
 	Start struct {
 		Path     string `name:"path,p" usage:"-p ~/C" hidden:"false" value:"/tmp"`
 		Interval int
+		Server   struct {
+			Port int `value:"8080"`
+		}
 	}
 }
 
@@ -149,13 +150,19 @@ func appCommands(app *cli.App) {
 	{
 		c := cli.Command{
 			Name:  `start`,
-			Usage: `starts feedwreq`,
+			Usage: `starts app`,
 			Action: func(*cli.Context) error {
-				defer tune.Finit(cnf.App.PostponeExit)
 				log.Printf("%+v", cnf)
 				return nil
 			},
 		}
+		c.Subcommands = append(c.Subcommands, cli.Command{
+			Name: `server`,
+			Action: func(*cli.Context) error {
+				log.Printf("%+v", cnf)
+				return nil
+			},
+		})
 		app.Commands = append(app.Commands, c)
 	}
 }
