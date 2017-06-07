@@ -76,8 +76,10 @@ func (b *Argify) setSharedParts(f cli.Flag, name, usage, envVar string, hidden b
 	if err := inflect.Set(f, "Usage", usage); err != nil {
 		// TODO:
 	}
-	if err := inflect.Set(f, "EnvVar", envVar); err != nil {
-		// TODO:
+	if envVar != "-" {
+		if err := inflect.Set(f, "EnvVar", envVar); err != nil {
+			// TODO:
+		}
 	}
 	if err := inflect.Set(f, "Hidden", hidden); err != nil {
 		// TODO:

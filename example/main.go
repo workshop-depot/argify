@@ -70,8 +70,8 @@ type ConfPile struct {
 	Version2 string `name:"v2" usage:"--v2 0.0.1" hidden:"false" value:"0.0.1"`
 
 	FBool     bool
-	FDuration time.Duration
-	FFloat64  float64
+	FDuration time.Duration `envvar:"-"`
+	FFloat64  float64       `envvar:"-"`
 	FInt64    int64
 	FInt      int `value:"33"`
 	FString   string
