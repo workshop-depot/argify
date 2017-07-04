@@ -57,6 +57,7 @@ func (b *Argify) extractSharedParts(
 			envVar = strings.Join([]string{b.appName, commandName, envName}, "_")
 		}
 		envVar = strings.Trim(envVar, "_")
+		envVar = strings.Replace(envVar, "-", "_", -1)
 		envVar = strings.ToUpper(envVar)
 	}
 	hidden = false
